@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from './Button';
 import { UserAnswer } from '../types';
@@ -6,14 +7,15 @@ import { QUIZ_DATA } from '../constants';
 interface ResultScreenProps {
   userName: string;
   userAnswers: UserAnswer[];
+  score: number;
   onRetryAll: () => void;
   onRetryWrong: () => void;
 }
 
-export const ResultScreen: React.FC<ResultScreenProps> = ({ userName, userAnswers, onRetryAll, onRetryWrong }) => {
+export const ResultScreen: React.FC<ResultScreenProps> = ({ userName, userAnswers, score, onRetryAll, onRetryWrong }) => {
   const correctCount = userAnswers.filter(a => a.isCorrect).length;
   const totalQuestions = userAnswers.length;
-  const percentage = Math.round((correctCount / totalQuestions) * 100);
+  const percentage = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
   
   const hasWrongAnswers = correctCount < totalQuestions;
 
@@ -46,7 +48,14 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ userName, userAnswer
         </div>
 
         <h2 className="text-3xl font-bold text-slate-800 mb-2">Quiz Completed!</h2>
-        <p className="text-lg text-slate-600 mb-4">Well done, <span className="font-bold text-blue-600">{userName}</span>!</p>
+        <p className="text-lg text-slate-600 mb-2">Well done, <span className="font-bold text-blue-600">{userName}</span>!</p>
+        
+        <div className="mb-6">
+            <span className="inline-block bg-blue-100 text-blue-800 text-xl font-bold px-6 py-2 rounded-full border border-blue-200 shadow-sm">
+                Total Score: {score}
+            </span>
+        </div>
+
         <p className={`text-xl font-bold mb-8 ${color}`}>{message}</p>
 
         <div className="grid grid-cols-2 gap-4 mb-8 bg-slate-50 p-4 rounded-xl border border-slate-100">

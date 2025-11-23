@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { QUIZ_DATA } from './constants';
 import { Question, UserAnswer, GameState, QuestionType } from './types';
@@ -15,6 +16,7 @@ const App: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
   const [showGrid, setShowGrid] = useState(false);
+  const [score, setScore] = useState(0);
 
   const handleStart = (name: string) => {
     setUserName(name);
@@ -25,6 +27,7 @@ const App: React.FC = () => {
     setActiveQuestions(questions);
     setCurrentQuestionIndex(0);
     setUserAnswers([]); 
+    setScore(0);
     setGameState(GameState.PLAYING);
   };
 
@@ -36,6 +39,10 @@ const App: React.FC = () => {
         isCorrect = response.replace(/\s+/g, ' ').trim() === currentQ.correctAnswer.replace(/\s+/g, ' ').trim();
     } else {
         isCorrect = response.trim().toLowerCase() === currentQ.correctAnswer.toLowerCase();
+    }
+
+    if (isCorrect) {
+      setScore(prev => prev + 10);
     }
 
     const newAnswer: UserAnswer = {
@@ -78,9 +85,6 @@ const App: React.FC = () => {
 
   const handleRetryWrong = () => {
     const wrongIds = userAnswers.filter(a => !a.isCorrect).map(a => a.questionId);
-    // Also include unanswered questions in "retry wrong" logic or just pure wrong? 
-    // Requirement says "retry wrong". Let's strict to wrong answers.
-    // But user might want to finish incomplete ones. Let's stick to strictly WRONG ones for this button.
     const wrongQuestions = QUIZ_DATA.filter(q => wrongIds.includes(q.id));
     startSession(wrongQuestions);
   };
@@ -95,6 +99,7 @@ const App: React.FC = () => {
       <ResultScreen 
         userName={userName} 
         userAnswers={userAnswers}
+        score={score}
         onRetryAll={handleRetryAll}
         onRetryWrong={handleRetryWrong}
       />
@@ -117,21 +122,28 @@ const App: React.FC = () => {
             <span className="font-bold text-slate-700">{userName}</span>
          </div>
          
-         <button 
-            onClick={() => setShowGrid(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-bold text-slate-600 transition-colors"
-         >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-            </svg>
-            Map
-         </button>
+         <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-lg border border-blue-100">
+            <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Score</span>
+            <span className="font-bold text-blue-600 text-lg">{score}</span>
+         </div>
 
-         <div className="flex flex-col items-end">
-            <span className="text-xs font-bold text-slate-400 uppercase">Progress</span>
-            <span className="font-bold text-blue-600 text-xl">
-                {currentQuestionIndex + 1} <span className="text-slate-400 text-sm">/ {activeQuestions.length}</span>
-            </span>
+         <div className="flex gap-3 items-center">
+             <button 
+                onClick={() => setShowGrid(true)}
+                className="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600 transition-colors"
+                title="Question Map"
+             >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+             </button>
+
+             <div className="flex flex-col items-end">
+                <span className="text-xs font-bold text-slate-400 uppercase">Progress</span>
+                <span className="font-bold text-slate-700 text-sm">
+                    {currentQuestionIndex + 1} / {activeQuestions.length}
+                </span>
+             </div>
          </div>
       </div>
 
